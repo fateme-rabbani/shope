@@ -1,88 +1,51 @@
 import { useState } from "react";
 
-const TaskItem = ({ task, changeStatus, removeTask }) => (
-  <li key={task.id}>
-    {task.desc}
-    <button onClick={() => changeStatus(task.id, "todo")}>todo</button>
-    <button onClick={() => changeStatus(task.id, "doing")}>doing</button>
-    <button onClick={() => changeStatus(task.id, "done")}>done</button>
-    <button onClick={() => removeTask(task.id)}>remove</button>
-  </li>
-);
-
-const TaskList = ({ tasks, status, changeStatus, removeTask }) => (
-  <ul>
-    {tasks
-      .filter((t) => t.status == status)
-      .map((task) => (
-        <TaskItem
-          task={task}
-          changeStatus={changeStatus}
-          removeTask={removeTask}
-        />
-      ))}
-  </ul>
-);
-
 let id = 0;
 const makeId = () => id++;
 
-const Todo = () => {
+const Shop = () => {
   const [tasks, setTasks] = useState([
-    { id: makeId(), desc: "first", status: "todo" },
-    { id: makeId(), desc: "second", status: "doing" },
-    { id: makeId(), desc: "third", status: "done" },
+    { id: makeId(), val: 0 },
+    { id: makeId(), val: 0 },
+    { id: makeId(), val: 0 },
   ]);
-  const [taskInp, setTaskInp] = useState("");
+  const [total, setTotal] = useState(0);
 
-  const handleChange = (event) => {
-    setTaskInp(event.target.value);
-  };
-
-  const addTask = (newTask) => {
-    setTasks([...tasks, { id: makeId(), desc: newTask, status: "todo" }]);
-    setTaskInp("");
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const newTask = taskInp;
-    if (!newTask) return alert("You must write something!");
-    addTask(newTask);
-  };
-
-  const removeTask = (id) => {
-    setTasks(tasks.filter((t) => id !== t.id));
-  };
-
-  const changeStatus = (id, newStatus) => {
+  const increase = (id) => {
+    setTotal(total + 1);
     setTasks(
       tasks.map((task) => {
-        if (task.id !== id) return task;
-        return { ...task, status: newStatus };
+        if (task.id === id) return { ...task, val: task.val + 1 };
+        return task;
       })
     );
   };
-
+  const remove = (id, val) => {
+    if (val > 0) setTotal(total - 1);
+    setTasks(
+      tasks.map((task) => {
+        if (task.id === id) return { ...task, val: task.val - 1 };
+        return task;
+      })
+    );
+    if (val < 1) setTasks(tasks.filter((t) => id !== t.id));
+  };
+  const reset = () => {
+    setTotal(0);
+  };
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input value={taskInp} onChange={handleChange} />
-        <input type="submit" value="Add" />
-      </form>
-      {["todo", "doing", "done"].map((status) => (
-        <>
-          <h1>{status}</h1>
-          <TaskList
-            tasks={tasks}
-            status={status}
-            changeStatus={changeStatus}
-            removeTask={removeTask}
-          />
-        </>
+    <>
+      <h1>سبد خرید{total}</h1>
+      <button onClick={reset}>ریستار</button>
+      {tasks.map((task) => (
+        <li key={task.id}>
+          <button onClick={() => increase(task.id)}>افزایش</button>
+          <button onClick={() => remove(task.id, task.val)}>حذف</button>
+          <p>{task.val}</p>
+        </li>
       ))}
-    </div>
+    </>
   );
 };
 
-export default Todo;
+export default Shop;
