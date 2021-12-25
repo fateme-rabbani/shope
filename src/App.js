@@ -1,26 +1,88 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
 
-function App() {
+const TaskItem = ({ task, changeStatus, removeTask }) => (
+  <li key={task.id}>
+    {task.desc}
+    <button onClick={() => changeStatus(task.id, "todo")}>todo</button>
+    <button onClick={() => changeStatus(task.id, "doing")}>doing</button>
+    <button onClick={() => changeStatus(task.id, "done")}>done</button>
+    <button onClick={() => removeTask(task.id)}>remove</button>
+  </li>
+);
+
+const TaskList = ({ tasks, status, changeStatus, removeTask }) => (
+  <ul>
+    {tasks
+      .filter((t) => t.status == status)
+      .map((task) => (
+        <TaskItem
+          task={task}
+          changeStatus={changeStatus}
+          removeTask={removeTask}
+        />
+      ))}
+  </ul>
+);
+
+let id = 0;
+const makeId = () => id++;
+
+const Todo = () => {
+  const [tasks, setTasks] = useState([
+    { id: makeId(), desc: "first", status: "todo" },
+    { id: makeId(), desc: "second", status: "doing" },
+    { id: makeId(), desc: "third", status: "done" },
+  ]);
+  const [taskInp, setTaskInp] = useState("");
+
+  const handleChange = (event) => {
+    setTaskInp(event.target.value);
+  };
+
+  const addTask = (newTask) => {
+    setTasks([...tasks, { id: makeId(), desc: newTask, status: "todo" }]);
+    setTaskInp("");
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const newTask = taskInp;
+    if (!newTask) return alert("You must write something!");
+    addTask(newTask);
+  };
+
+  const removeTask = (id) => {
+    setTasks(tasks.filter((t) => id !== t.id));
+  };
+
+  const changeStatus = (id, newStatus) => {
+    setTasks(
+      tasks.map((task) => {
+        if (task.id !== id) return task;
+        return { ...task, status: newStatus };
+      })
+    );
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input value={taskInp} onChange={handleChange} />
+        <input type="submit" value="Add" />
+      </form>
+      {["todo", "doing", "done"].map((status) => (
+        <>
+          <h1>{status}</h1>
+          <TaskList
+            tasks={tasks}
+            status={status}
+            changeStatus={changeStatus}
+            removeTask={removeTask}
+          />
+        </>
+      ))}
     </div>
   );
-}
+};
 
-export default App;
+export default Todo;
